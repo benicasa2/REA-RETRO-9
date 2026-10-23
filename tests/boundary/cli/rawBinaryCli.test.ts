@@ -68,6 +68,66 @@ cliTest(
   },
 );
 
+cliTest(
+  "rejects a 6809 image crossing the 16-bit boundary before provider startup",
+  async ({ cli }) => {
+    const root = await createTestTempDirectory("rea-6809-cli-overflow-");
+    const path = join(root, "image.bin");
+    await writeFile(path, Buffer.from("8e016039", "hex"));
+    const result = await cli.run({
+      arguments: [
+        "inspect",
+        path,
+        "--target-format",
+        "raw-binary",
+        "--architecture",
+        "6809",
+        "--entry-point",
+        "0xffff",
+        "--provider",
+        "ghidra",
+        "--json",
+      ],
+      environment: { HOME: root, XDG_CONFIG_HOME: root, XDG_CACHE_HOME: root },
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.json).toMatchObject({
+      code: "invalid_request",
+      details: { reason: expect.stringContaining("6809 address width") },
+    });
+  },
+);
+
+cliTest(
+  "rejects a z80 image crossing the 16-bit boundary before provider startup",
+  async ({ cli }) => {
+    const root = await createTestTempDirectory("rea-z80-cli-overflow-");
+    const path = join(root, "image.bin");
+    await writeFile(path, Buffer.from("3e2ac9", "hex"));
+    const result = await cli.run({
+      arguments: [
+        "inspect",
+        path,
+        "--target-format",
+        "raw-binary",
+        "--architecture",
+        "z80",
+        "--entry-point",
+        "0xffff",
+        "--provider",
+        "ghidra",
+        "--json",
+      ],
+      environment: { HOME: root, XDG_CONFIG_HOME: root, XDG_CACHE_HOME: root },
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.json).toMatchObject({
+      code: "invalid_request",
+      details: { reason: expect.stringContaining("z80 address width") },
+    });
+  },
+);
+
 cliTest.for([
   ["arm64", "c0035fd6", "0x8000001", "must be 4-byte aligned"],
   ["m68k", "4e75", "0x1001", "must be 2-byte aligned"],

@@ -121,6 +121,8 @@ it.each(RAW_ONLY_ARCHITECTURES)(
 it.each([
   ["arm", "0x08000000", "0x8000000", "1eff2fe1"],
   ["6502", "0x008001", "0x8001", "a92a60"],
+  ["6809", "0x002541", "0x2541", "8e016039"],
+  ["z80", "0x008001", "0x8001", "3e2ac9"],
   ["m68k", "0x00001000", "0x1000", "4e714e7170014e75"],
 ])(
   "opens a headerless %s image when architecture and entry are supplied",

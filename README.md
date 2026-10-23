@@ -1,3 +1,15 @@
+# REA Retro — 6502, Motorola 6809 e Zilog Z80
+
+Versão derivada de [morluto/rea](https://github.com/morluto/rea), baseada no REA 6.7.0.
+Acrescenta análise estática de binários brutos **6809** e **Z80** pelo Ghidra,
+preservando o suporte existente a **6502** e às demais arquiteturas.
+
+Veja [uso, configuração e validação da extensão](docs/retro-cpus.md).
+Esta é uma versão derivada independente; não é uma distribuição oficial do REA original.
+A licença e os créditos upstream foram preservados.
+
+---
+
 <div align="center">
 
 **English** · [简体中文](docs/readme/README_zh.md) · [繁體中文](docs/readme/README_zh-TW.md) · [日本語](docs/readme/README_ja.md) · [한국어](docs/readme/README_ko.md) · [Türkçe](docs/readme/README_tr.md) · [Русский](docs/readme/README_ru.md) · [Tiếng Việt](docs/readme/README_vi.md) · [ไทย](docs/readme/README_th.md) · [Deutsch](docs/readme/README_de.md) · [Español](docs/readme/README_es.md) · [Français](docs/readme/README_fr.md) · [Українська](docs/readme/README_uk.md) · [Polski](docs/readme/README_pl.md) · [Português (Brasil)](docs/readme/README_pt-BR.md) · [العربية](docs/readme/README_ar.md) · [فارسی](docs/readme/README_fa.md) · [Bahasa Indonesia](docs/readme/README_id.md) · [Italiano](docs/readme/README_it.md)

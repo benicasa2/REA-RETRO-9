@@ -25,12 +25,12 @@ rea inspect-native-load-image /absolute/path/to/ecu.bin --target-format raw-bina
 }
 ```
 
-`architecture` is one of `x86`, `x86_64`, `arm`, `arm64`, `6502`, or `m68k`. `entry_point` is a
+`architecture` is one of `x86`, `x86_64`, `arm`, `arm64`, `6502`, `6809`, `z80`, or `m68k`. `entry_point` is a
 hexadecimal address of the form `0x…`. The complete file is mapped starting at
 that address, and Ghidra seeds an `entry` function there before auto-analysis.
 ARM and AArch64 entries must be 4-byte aligned; m68k entries must be 2-byte
-aligned; x86 and 6502 entries may be byte-aligned.
-For 6502, the entry and complete mapped file must fit within `0x0000..0xffff`;
+aligned; x86, 6502, 6809, and z80 entries may be byte-aligned.
+For 6502, 6809, and z80, the entry and complete mapped file must fit within `0x0000..0xffff`;
 images that cross the 16-bit boundary are rejected before provider startup.
 For m68k, the mapping must fit within `0x0..0xffffffff`.
 `open_binary` and an open `binary_session` return the canonical `entry_point`
@@ -40,7 +40,7 @@ Omitted `format` keeps header-based detection; architecture and entry without
 
 Ghidra imports a private snapshot with `BinaryLoader` and these generic
 languages and compiler specifications. Each family has one fixed byte order:
-m68k is big-endian and the others are little-endian.
+m68k and 6809 are big-endian; the others are little-endian.
 
 | architecture | language_id           | compiler_spec_id |
 | ------------ | --------------------- | ---------------- |
@@ -48,6 +48,8 @@ m68k is big-endian and the others are little-endian.
 | x86_64       | `x86:LE:64:default`   | `gcc`            |
 | arm          | `ARM:LE:32:v7`        | `default`        |
 | arm64        | `AARCH64:LE:64:v8A`   | `default`        |
+| z80          | `z80:LE:16:default`   | `default`        |
+| 6809         | `6809:BE:16:default`  | `default`        |
 | 6502         | `6502:LE:16:default`  | `default`        |
 | m68k         | `68000:BE:32:default` | `default`        |
 
@@ -75,7 +77,7 @@ non-overlay in the bound language's default address space. Contradictory mapping
 observations are retained with `mismatch`, even when the source hashes agree.
 
 Hopper and IDA refuse raw-binary targets. Windows Ghidra P0 admits native PE
-applications/DLLs and explicitly selected raw 6502 images. Other raw CPU families
+applications/DLLs and explicitly selected raw 6502, 6809 or z80 images. Other raw CPU families
 remain outside the Windows boundary. Native path admission, private DACLs, Job
 Object ownership, immutable snapshots, and the no-mutation policy still apply.
 
@@ -149,3 +151,44 @@ exercised.
 - Independent load-image verification covers source identity, mapped file
   bytes, the bound language, and the caller-supplied entry. Original bytes
   stay unchanged.
+
+## Motorola 6809 (local extension)
+
+This local version accepts `--architecture 6809` on Windows, Linux and macOS.
+Ghidra binding: `6809:BE:16:default`, compiler `default`, address space `RAM`.
+The complete raw payload must fit in 64 KiB. Odd addresses are valid.
+The Hitachi 6309 extension is not selected. This does not emulate a CoCo.
+
+`entry_point` retains the existing REA contract: it maps file offset zero AND
+seeds analysis there. If the real execution address differs, request a function
+at that address after import. Do not shift the payload to its execution address.
+
+CoCo DECB `.BIN` has a record envelope; it is not a headerless image. Remove
+the envelope, preserve each record's load address, and analyze a suitable raw
+image. CAS/DECB parsing and automatic relocation are not added by this extension.
+For the single-segment MISTAR payload: map `MISTAR.raw` at `0x2460` and request
+function `0x2540`. The bootstrap copies bytes into low RAM; static import alone
+does not reproduce those runtime changes.
+
+```powershell
+node scripts/rea.mjs inspect MISTAR.raw --target-format raw-binary --architecture 6809 --entry-point 0x2460 --provider ghidra --json
+node scripts/rea.mjs function MISTAR.raw 0x2540 --target-format raw-binary --architecture 6809 --entry-point 0x2460 --provider ghidra --json
+```
+
+Ghidra and its supported JDK must be installed separately. Unit/provider-contract
+tests do not establish real Ghidra decoding or decompilation.
+
+## Zilog Z80 (local extension)
+
+Select `--architecture z80` for a headerless classic Z80 image on Windows,
+Linux or macOS. Binding: `z80:LE:16:default`, compiler `default`, space `ram`.
+The full mapping must fit in 64 KiB; byte-aligned entries are accepted.
+This does not select Z180/eZ80, implement bank switching, parse MSX/Spectrum
+containers, or emulate a computer's ROM, display, keyboard or I/O.
+
+```powershell
+node scripts/rea.mjs function program.raw 0x8001 --target-format raw-binary --architecture z80 --entry-point 0x8001 --provider ghidra --json
+```
+
+As with other raw families, `entry-point` maps file offset zero. Use an explicit
+REA_GHIDRA_SEED_FILE when a separate execution entry is not found automatically.

@@ -11,13 +11,25 @@ export interface GhidraRawBinaryLanguage {
  * Map caller-visible CPU families to generic Ghidra languages with a
  * supported generic compiler specification. These are analysis conventions,
  * not evidence of the target's original compiler. Each family has one fixed
- * byte order: m68k is big-endian and the others are little-endian. Big-endian
+ * byte order: m68k and 6809 are big-endian; the others are little-endian. Big-endian
  * ARM, Thumb-only, Cortex-M, and other processor variants are out of scope.
  */
 export const ghidraRawBinaryLanguage = (
   architecture: RawBinaryAdmission["architecture"],
 ): GhidraRawBinaryLanguage => {
   switch (architecture) {
+    case "z80":
+      return {
+        languageId: "z80:LE:16:default",
+        compilerSpecId: "default",
+        defaultAddressSpace: "ram",
+      };
+    case "6809":
+      return {
+        languageId: "6809:BE:16:default",
+        compilerSpecId: "default",
+        defaultAddressSpace: "RAM",
+      };
     case "6502":
       return {
         languageId: "6502:LE:16:default",

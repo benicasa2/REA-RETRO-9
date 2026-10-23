@@ -12,6 +12,20 @@ describe("raw-binary Ghidra language binding", () => {
       defaultAddressSpace: "ram",
     });
   });
+  it("maps the big-endian 6809 family to the default 6809 language", () => {
+    expect(ghidraRawBinaryLanguage("6809")).toEqual({
+      languageId: "6809:BE:16:default",
+      compilerSpecId: "default",
+      defaultAddressSpace: "RAM",
+    });
+  });
+  it("maps the little-endian Z80 family to the default Z80 language", () => {
+    expect(ghidraRawBinaryLanguage("z80")).toEqual({
+      languageId: "z80:LE:16:default",
+      compilerSpecId: "default",
+      defaultAddressSpace: "ram",
+    });
+  });
   it("maps the four admitted families to little-endian generic languages", () => {
     expect(ghidraRawBinaryLanguage("x86")).toEqual({
       languageId: "x86:LE:32:default",
@@ -69,6 +83,82 @@ describe("raw-binary mapped-block state", () => {
               expected: "RAM",
               observed: space,
               matched: space === "RAM",
+            }),
+          ]),
+        },
+      });
+    },
+  );
+  it.each(["RAM", "ram"])(
+    "requires the bound 6809 address space for %s observations",
+    (space) => {
+      const f = fixtureRawBinaryLoadImage();
+      const target = {
+        ...f.target,
+        architecture: "6809" as const,
+        availableArchitectures: ["6809" as const],
+        entryPoint: "0x8001",
+        entryPointSource: "0x8001",
+      };
+      f.observation.language_id = "6809:BE:16:default";
+      f.observation.default_address_space = space;
+      f.observation.entry_points = [target.entryPoint];
+      const mapping = f.observation.mappings[0];
+      if (mapping === undefined)
+        throw new Error("Missing source mapping fixture");
+      mapping.start = target.entryPoint;
+      mapping.end = "0x8004";
+      mapping.address_space = space;
+      expect(
+        attestGhidraRawBinaryLoadImage(f.snapshot, target, f.observation),
+      ).toMatchObject({
+        ok: true,
+        value: {
+          status: space === "RAM" ? "verified" : "mismatch",
+          checks: expect.arrayContaining([
+            expect.objectContaining({
+              name: "default_address_space",
+              expected: "RAM",
+              observed: space,
+              matched: space === "RAM",
+            }),
+          ]),
+        },
+      });
+    },
+  );
+  it.each(["RAM", "ram"])(
+    "requires the bound z80 address space for %s observations",
+    (space) => {
+      const f = fixtureRawBinaryLoadImage();
+      const target = {
+        ...f.target,
+        architecture: "z80" as const,
+        availableArchitectures: ["z80" as const],
+        entryPoint: "0x8001",
+        entryPointSource: "0x8001",
+      };
+      f.observation.language_id = "z80:LE:16:default";
+      f.observation.default_address_space = space;
+      f.observation.entry_points = [target.entryPoint];
+      const mapping = f.observation.mappings[0];
+      if (mapping === undefined)
+        throw new Error("Missing source mapping fixture");
+      mapping.start = target.entryPoint;
+      mapping.end = "0x8004";
+      mapping.address_space = space;
+      expect(
+        attestGhidraRawBinaryLoadImage(f.snapshot, target, f.observation),
+      ).toMatchObject({
+        ok: true,
+        value: {
+          status: space === "ram" ? "verified" : "mismatch",
+          checks: expect.arrayContaining([
+            expect.objectContaining({
+              name: "default_address_space",
+              expected: "ram",
+              observed: space,
+              matched: space === "ram",
             }),
           ]),
         },
