@@ -1,12 +1,30 @@
-# REA Retro — 6502, Motorola 6809 e Zilog Z80
+# REA Retro 7 — análise de sete CPUs clássicas
 
-Versão derivada de [morluto/rea](https://github.com/morluto/rea), baseada no REA 6.7.0.
-Acrescenta análise estática de binários brutos **6809** e **Z80** pelo Ghidra,
-preservando o suporte existente a **6502** e às demais arquiteturas.
+Versão derivada de [morluto/rea](https://github.com/morluto/rea), baseada no REA 6.7.0,
+com suporte explícito a **6502, 65C02, 65816, Intel 8080, Motorola 6800, Motorola 6809 e Z80**.
 
-Veja [uso, configuração e validação da extensão](docs/retro-cpus.md).
-Esta é uma versão derivada independente; não é uma distribuição oficial do REA original.
-A licença e os créditos upstream foram preservados.
+| Arquitetura | Opção CLI/MCP | Espaço de endereços |
+| --- | --- | --- |
+| MOS 6502 | `6502` | 16 bits |
+| CMOS 65C02 | `65c02` | 16 bits |
+| WDC 65816 | `65816` | 24 bits |
+| Intel 8080 | `8080` | 16 bits |
+| Motorola 6800 | `6800` | 16 bits |
+| Motorola 6809 | `6809` | 16 bits |
+| Zilog Z80 | `z80` | 16 bits |
+
+Veja [configuração, módulos e testes da versão atual](docs/retro-additional-cpus.md).
+Os módulos adicionais, seus fontes e licenças estão em
+[third_party/retro-processors](third_party/retro-processors).
+
+**65816 é experimental:** inicia em modo nativo com acumulador e índices de 16 bits.
+REP/SEP podem alterar a largura de decodificação. Outros estados iniciais não são
+inferidos; veja os limites na documentação. Esta ferramenta faz análise estática,
+não emulação do computador nem conversão automática de jogos.
+
+Preserva o histórico, a licença e os créditos do REA original. Esta versão derivada
+é independente do projeto upstream. Ghidra, JDK e dependências devem ser instalados
+separadamente; não estão embutidos neste repositório.
 
 ---
 

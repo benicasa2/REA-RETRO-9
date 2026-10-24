@@ -1,5 +1,7 @@
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
+import ghidra.program.model.lang.Register;
+import java.math.BigInteger;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.mem.MemoryBlock;
 import ghidra.program.model.mem.MemoryBlockSourceInfo;
@@ -39,6 +41,17 @@ public final class ReaGhidraPrepareRaw extends GhidraScript {
             throw new IllegalArgumentException(
                 "Raw binary import must map file offset 0 at the caller-supplied entry"
             );
+        }
+        if (expectedLanguage.equals("65816:LE:16:default")) {
+            for (String name : new String[] { "ctx_MF", "ctx_XF", "ctx_EF", "PBR" }) {
+                Register register = currentProgram.getRegister(name);
+                if (register == null) {
+                    throw new IllegalStateException("65816 module lacks required entry register: " + name);
+                }
+                BigInteger value = name.equals("PBR")
+                    ? BigInteger.valueOf((entry.getOffset() >>> 16) & 0xff) : BigInteger.ZERO;
+                currentProgram.getProgramContext().setValue(register, entry, entry, value);
+            }
         }
         addEntryPoint(entry);
         if (!disassemble(entry) || createFunction(entry, "entry") == null) {

@@ -692,7 +692,10 @@ public final class ReaGhidraBridge extends HeadlessScript {
             JsonObject context = new JsonObject();
             context.addProperty("address", canonicalAddress(entry));
             JsonArray registers = new JsonArray();
-            for (String name : new String[] { "CS", "DS", "ES", "SS" }) {
+            String[] contextNames = currentProgram.getLanguageID().getIdAsString().equals("65816:LE:16:default")
+                ? new String[] { "ctx_MF", "ctx_XF", "ctx_EF", "PBR", "DBR", "DP" }
+                : new String[] { "CS", "DS", "ES", "SS" };
+            for (String name : contextNames) {
                 Register register = currentProgram.getRegister(name);
                 if (register == null) continue;
                 JsonObject row = new JsonObject();

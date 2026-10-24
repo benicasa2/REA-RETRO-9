@@ -9,6 +9,10 @@ export const BINARY_ARCHITECTURES = [
   "arm64_32",
   "mips",
   "6502",
+  "65c02",
+  "65816",
+  "8080",
+  "6800",
   "6809",
   "z80",
   "riscv",
@@ -24,6 +28,10 @@ export type BinaryArchitecture = (typeof BINARY_ARCHITECTURES)[number];
  */
 export const RAW_ONLY_ARCHITECTURES = [
   "6502",
+  "65c02",
+  "65816",
+  "8080",
+  "6800",
   "6809",
   "z80",
   "m68k",

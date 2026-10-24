@@ -370,3 +370,105 @@ describe("raw-binary independent load-image checks", () => {
     ).toBe(false);
   });
 });
+
+describe("additional retro language and mapping verification", () => {
+  it.each([
+    ["65c02", "65C02:LE:16:default", "RAM", "0x8001", "0x8004"],
+    ["65816", "65816:LE:16:default", "bus", "0x128001", "0x128004"],
+    ["8080", "8080:LE:16:default", "ram", "0x8001", "0x8004"],
+    ["6800", "MC6800:BE:16:default", "RAM", "0x8001", "0x8004"],
+  ] as const)(
+    "binds %s and rejects the wrong address space",
+    (architecture, language, space, start, end) => {
+      expect(ghidraRawBinaryLanguage(architecture)).toMatchObject({
+        languageId: language,
+        compilerSpecId: "default",
+        defaultAddressSpace: space,
+      });
+      for (const observedSpace of [space, "wrong-space"]) {
+        const f = fixtureRawBinaryLoadImage();
+        const target = {
+          ...f.target,
+          architecture,
+          availableArchitectures: [architecture],
+          entryPoint: start,
+          entryPointSource: start,
+        };
+        f.observation.language_id = language;
+        f.observation.default_address_space = observedSpace;
+        f.observation.entry_points = [start];
+        if (architecture === "65816")
+          f.observation.entry_context = [
+            {
+              address: start,
+              registers: [
+                { name: "ctx_MF", value_hex: "0x0" },
+                { name: "ctx_XF", value_hex: "0x0" },
+                { name: "ctx_EF", value_hex: "0x0" },
+                { name: "PBR", value_hex: "0x12" },
+              ],
+            },
+          ];
+        const mapping = f.observation.mappings[0];
+        if (!mapping) throw new Error("Missing source mapping fixture");
+        Object.assign(mapping, { start, end, address_space: observedSpace });
+        expect(
+          attestGhidraRawBinaryLoadImage(f.snapshot, target, f.observation),
+        ).toMatchObject({
+          ok: true,
+          value: { status: observedSpace === space ? "verified" : "mismatch" },
+        });
+      }
+    },
+  );
+});
+
+describe("65816 initial CPU state attestation", () => {
+  it.each(["ctx_MF", "ctx_XF", "ctx_EF", "PBR"])(
+    "retains mismatching %s context",
+    (badRegister) => {
+      const f = fixtureRawBinaryLoadImage();
+      const target = {
+        ...f.target,
+        architecture: "65816" as const,
+        availableArchitectures: ["65816" as const],
+        entryPoint: "0x128001",
+        entryPointSource: "0x128001",
+      };
+      f.observation.language_id = "65816:LE:16:default";
+      f.observation.default_address_space = "bus";
+      f.observation.entry_points = [target.entryPoint];
+      f.observation.entry_context = [
+        {
+          address: target.entryPoint,
+          registers: ["ctx_MF", "ctx_XF", "ctx_EF", "PBR"].map((name) => ({
+            name,
+            value_hex:
+              name === badRegister ? "0x1" : name === "PBR" ? "0x12" : "0x0",
+          })),
+        },
+      ];
+      const mapping = f.observation.mappings[0];
+      if (!mapping) throw new Error("Missing mapping");
+      Object.assign(mapping, {
+        start: target.entryPoint,
+        end: "0x128004",
+        address_space: "bus",
+      });
+      expect(
+        attestGhidraRawBinaryLoadImage(f.snapshot, target, f.observation),
+      ).toMatchObject({
+        ok: true,
+        value: {
+          status: "mismatch",
+          checks: expect.arrayContaining([
+            expect.objectContaining({
+              name: `entry_context.${badRegister}`,
+              matched: false,
+            }),
+          ]),
+        },
+      });
+    },
+  );
+});

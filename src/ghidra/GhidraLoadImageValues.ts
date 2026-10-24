@@ -447,6 +447,24 @@ export const attestGhidraRawBinaryLoadImage = (
     observations.entry_points.find((entry) => entry === target.entryPoint) ??
       null,
   );
+  if (target.architecture === "65816") {
+    const entryContext = observations.entry_context.find(
+      (item) => item.address === target.entryPoint,
+    );
+    for (const [name, expected] of [
+      ["ctx_MF", "0x0"],
+      ["ctx_XF", "0x0"],
+      ["ctx_EF", "0x0"],
+      ["PBR", hexAddress((base >> 16n) & 0xffn)],
+    ] as const) {
+      check(
+        `entry_context.${name}`,
+        expected,
+        entryContext?.registers.find((item) => item.name === name)?.value_hex ??
+          null,
+      );
+    }
+  }
   check("relocation_records", [], observations.relocations);
   return ok(
     nativeLoadImageSchema.parse({

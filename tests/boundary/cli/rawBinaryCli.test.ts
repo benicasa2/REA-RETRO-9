@@ -194,3 +194,41 @@ cliTest(
     );
   },
 );
+
+cliTest.for([
+  ["65c02", "0xffff"],
+  ["8080", "0xffff"],
+  ["6800", "0xffff"],
+  ["65816", "0xffffff"],
+] as const)(
+  "rejects %s image overflow before starting a provider",
+  async ([architecture, entry], { cli }) => {
+    const root = await createTestTempDirectory("rea-retro-cli-overflow-");
+    const path = join(root, "image.raw");
+    await writeFile(path, Buffer.from("a92a60", "hex"));
+    const result = await cli.run({
+      arguments: [
+        "inspect",
+        path,
+        "--target-format",
+        "raw-binary",
+        "--architecture",
+        architecture,
+        "--entry-point",
+        entry,
+        "--provider",
+        "ghidra",
+        "--json",
+      ],
+      environment: { HOME: root, XDG_CONFIG_HOME: root, XDG_CACHE_HOME: root },
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.json).toMatchObject({
+      code: "invalid_request",
+      details: {
+        constraint: "load_selection_rejected",
+        reason: expect.stringContaining(architecture + " address width"),
+      },
+    });
+  },
+);

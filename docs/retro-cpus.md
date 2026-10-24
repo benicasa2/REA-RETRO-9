@@ -1,3 +1,5 @@
+> Documento histórico da primeira extensão. Para a versão com sete CPUs, consulte [a documentação atual](retro-additional-cpus.md), que substitui os limites antigos descritos abaixo.
+
 # REA Retro: suporte a 6502, 6809 e Z80
 
 Esta versão deriva de morluto/rea, commit base

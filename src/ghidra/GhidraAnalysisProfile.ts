@@ -161,6 +161,25 @@ export const resolveGhidraAnalysisProfile = async (
           language_id: language.languageId,
           compiler_spec_id: language.compilerSpecId,
           language_selection: "caller-supplied-v1",
+          ...(target.architecture === "65816"
+            ? {
+                raw_entry_context: "65816-native-m16-x16-e0-pbr-from-entry-v1",
+                community_processor:
+                  "kaayzouee/ghidra-65816@dbe194026a4b810e9224cc9a4092de2798c67866",
+              }
+            : {}),
+          ...(target.architecture === "6800"
+            ? {
+                community_processor:
+                  "sigurasg/GhidraMC6800@713ae0232f6e2f67b67d6ea0cf9b4e7f6864a6b2",
+              }
+            : {}),
+          ...(target.architecture === "8080"
+            ? {
+                community_processor:
+                  "rea-8080-from-ghidra-12.1.4-8085-without-rim-sim-v1",
+              }
+            : {}),
           entry_point: target.entryPoint,
           entry_seed: "external-entry-and-function-before-analysis-v1",
           ...analyzerParameters,

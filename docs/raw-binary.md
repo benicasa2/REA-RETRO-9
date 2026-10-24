@@ -25,13 +25,14 @@ rea inspect-native-load-image /absolute/path/to/ecu.bin --target-format raw-bina
 }
 ```
 
-`architecture` is one of `x86`, `x86_64`, `arm`, `arm64`, `6502`, `6809`, `z80`, or `m68k`. `entry_point` is a
+`architecture` is one of `x86`, `x86_64`, `arm`, `arm64`, `6502`, `65c02`, `65816`, `8080`, `6800`, `6809`, `z80`, or `m68k`. `entry_point` is a
 hexadecimal address of the form `0x…`. The complete file is mapped starting at
 that address, and Ghidra seeds an `entry` function there before auto-analysis.
 ARM and AArch64 entries must be 4-byte aligned; m68k entries must be 2-byte
-aligned; x86, 6502, 6809, and z80 entries may be byte-aligned.
-For 6502, 6809, and z80, the entry and complete mapped file must fit within `0x0000..0xffff`;
+aligned; x86 and retro CPU entries may be byte-aligned.
+For 6502, 65c02, 8080, 6800, 6809, and z80, the entry and complete mapped file must fit within `0x0000..0xffff`;
 images that cross the 16-bit boundary are rejected before provider startup.
+For 65816, the complete mapping must fit within `0x0..0xffffff`.
 For m68k, the mapping must fit within `0x0..0xffffffff`.
 `open_binary` and an open `binary_session` return the canonical `entry_point`
 for raw targets so callers can verify the selected mapping directly.
@@ -40,7 +41,7 @@ Omitted `format` keeps header-based detection; architecture and entry without
 
 Ghidra imports a private snapshot with `BinaryLoader` and these generic
 languages and compiler specifications. Each family has one fixed byte order:
-m68k and 6809 are big-endian; the others are little-endian.
+m68k, 6800 and 6809 are big-endian; the others are little-endian.
 
 | architecture | language_id           | compiler_spec_id |
 | ------------ | --------------------- | ---------------- |
@@ -48,6 +49,10 @@ m68k and 6809 are big-endian; the others are little-endian.
 | x86_64       | `x86:LE:64:default`   | `gcc`            |
 | arm          | `ARM:LE:32:v7`        | `default`        |
 | arm64        | `AARCH64:LE:64:v8A`   | `default`        |
+| 65c02        | `65C02:LE:16:default` | `default`        |
+| 65816        | `65816:LE:16:default` | `default`        |
+| 8080         | `8080:LE:16:default`  | `default`        |
+| 6800         | `MC6800:BE:16:default`| `default`        |
 | z80          | `z80:LE:16:default`   | `default`        |
 | 6809         | `6809:BE:16:default`  | `default`        |
 | 6502         | `6502:LE:16:default`  | `default`        |
@@ -77,7 +82,7 @@ non-overlay in the bound language's default address space. Contradictory mapping
 observations are retained with `mismatch`, even when the source hashes agree.
 
 Hopper and IDA refuse raw-binary targets. Windows Ghidra P0 admits native PE
-applications/DLLs and explicitly selected raw 6502, 6809 or z80 images. Other raw CPU families
+applications/DLLs and explicitly selected raw 6502, 65c02, 65816, 8080, 6800, 6809 or z80 images. Other raw CPU families
 remain outside the Windows boundary. Native path admission, private DACLs, Job
 Object ownership, immutable snapshots, and the no-mutation policy still apply.
 
@@ -192,3 +197,11 @@ node scripts/rea.mjs function program.raw 0x8001 --target-format raw-binary --ar
 
 As with other raw families, `entry-point` maps file offset zero. Use an explicit
 REA_GHIDRA_SEED_FILE when a separate execution entry is not found automatically.
+
+## Additional local retro families
+
+The `65c02`, `65816`, `8080`, and `6800` lanes are documented in
+[additional retro CPUs](retro-additional-cpus.md). 65816 has a 24-bit bus despite
+the third-party module's historical 16-bit language ID. It starts in native
+16-bit accumulator/index mode; the entry program bank follows the load address.
+The three additional modules must be explicitly installed into Ghidra.

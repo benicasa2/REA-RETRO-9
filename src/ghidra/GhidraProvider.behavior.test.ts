@@ -497,6 +497,48 @@ describe("Ghidra raw-binary profile", () => {
         .some(({ available, effects }) => available && effects.mutatesArtifact),
     ).toBe(false);
   });
+
+  it.each([
+    ["65c02", "65C02:LE:16:default", "0x8001"],
+    ["65816", "65816:LE:16:default", "0x128001"],
+    ["8080", "8080:LE:16:default", "0x8001"],
+    ["6800", "MC6800:BE:16:default", "0x8001"],
+  ] as const)(
+    "admits raw %s on Windows without mutation authority",
+    async (architecture, language, entry) => {
+      const ghidra = provider(installationHost("win32"));
+      const target: BinaryTarget = {
+        path: "/tmp/retro.bin",
+        sha256: "a".repeat(64),
+        kind: "executable",
+        format: "raw-binary",
+        architecture,
+        availableArchitectures: [architecture],
+        entryPoint: entry,
+        entryPointSource: entry,
+      };
+      expect(ghidra.inspectTargetSupport(target).status).toBe("supported");
+      const resolved = await ghidra.resolveAnalysisProfile(target);
+      if (!resolved.ok) throw resolved.error;
+      expect(resolved.value.profile?.parameters).toMatchObject({
+        architecture,
+        loader: "BinaryLoader",
+        language_id: language,
+        entry_point: entry,
+      });
+      if (architecture === "65816")
+        expect(resolved.value.profile?.parameters.raw_entry_context).toBe(
+          "65816-native-m16-x16-e0-pbr-from-entry-v1",
+        );
+      expect(
+        ghidra
+          .capabilities()
+          .some(
+            ({ available, effects }) => available && effects.mutatesArtifact,
+          ),
+      ).toBe(false);
+    },
+  );
   it("commits BinaryLoader language and caller-supplied entry", async () => {
     const ghidra = provider();
     const target: BinaryTarget = {

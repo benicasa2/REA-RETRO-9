@@ -332,3 +332,52 @@ describe("z80 raw-binary admission", () => {
     },
   );
 });
+
+describe("additional retro CPU address widths", () => {
+  it.each(["65c02", "8080", "6800"])(
+    "admits byte-aligned %s images only inside 16 bits",
+    (architecture) => {
+      for (const [entryPoint, fileBytes] of [
+        ["0x8001", 8],
+        ["0xffff", 1],
+        ["0x0", 65536],
+      ] as const)
+        expect(
+          admitRawBinary({ architecture, entryPoint, fileBytes }),
+        ).toMatchObject({ ok: true });
+      for (const [entryPoint, fileBytes] of [
+        ["0x10000", 1],
+        ["0xffff", 2],
+        ["0x0", 65537],
+      ] as const)
+        expect(
+          admitRawBinary({ architecture, entryPoint, fileBytes }),
+        ).toMatchObject({
+          ok: false,
+          error: { constraint: "load_selection_rejected" },
+        });
+    },
+  );
+  it("admits 65816 banked addresses and rejects overflow past 24 bits", () => {
+    for (const [entryPoint, fileBytes] of [
+      ["0x128001", 8],
+      ["0xffffff", 1],
+      ["0x0", 16777216],
+      ["0xffff", 2],
+    ] as const)
+      expect(
+        admitRawBinary({ architecture: "65816", entryPoint, fileBytes }),
+      ).toMatchObject({ ok: true });
+    for (const [entryPoint, fileBytes] of [
+      ["0x1000000", 1],
+      ["0xffffff", 2],
+      ["0x0", 16777217],
+    ] as const)
+      expect(
+        admitRawBinary({ architecture: "65816", entryPoint, fileBytes }),
+      ).toMatchObject({
+        ok: false,
+        error: { constraint: "load_selection_rejected" },
+      });
+  });
+});

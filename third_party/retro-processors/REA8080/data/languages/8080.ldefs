@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language_definitions><language processor="8080" endian="little" size="16" variant="default" version="1.0" slafile="8080.sla" processorspec="8080.pspec" id="8080:LE:16:default"><description>Intel 8080 documented ISA (REA Retro, derived from Ghidra 8085)</description><compiler name="default" spec="8080.cspec" id="default"/></language></language_definitions>

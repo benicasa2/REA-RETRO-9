@@ -15,6 +15,10 @@ export const BINARY_ARCHITECTURES = [
   "arm",
   "arm64",
   "6502",
+  "65c02",
+  "65816",
+  "8080",
+  "6800",
   "6809",
   "z80",
   "m68k",
@@ -79,13 +83,20 @@ export interface RawBinaryAdmissionRejection {
 }
 
 const addressWidth = (architecture: BinaryArchitecture): bigint =>
-  architecture === "6502" || architecture === "6809" || architecture === "z80"
+  architecture === "6502" ||
+  architecture === "65c02" ||
+  architecture === "8080" ||
+  architecture === "6800" ||
+  architecture === "6809" ||
+  architecture === "z80"
     ? 0xffffn
-    : architecture === "x86" ||
-        architecture === "arm" ||
-        architecture === "m68k"
-      ? 0xffffffffn
-      : 0xffffffffffffffffn;
+    : architecture === "65816"
+      ? 0xffffffn
+      : architecture === "x86" ||
+          architecture === "arm" ||
+          architecture === "m68k"
+        ? 0xffffffffn
+        : 0xffffffffffffffffn;
 
 /** Validate architecture, entry, and that the mapped image fits the CPU width. */
 export const admitRawBinary = (input: {
@@ -97,7 +108,7 @@ export const admitRawBinary = (input: {
   if (!architecture.success)
     return err({
       reason:
-        "raw-binary format requires architecture (x86, x86_64, arm, arm64, 6502, 6809, z80, or m68k)",
+        "raw-binary format requires architecture (x86, x86_64, arm, arm64, 6502, 65c02, 65816, 8080, 6800, 6809, z80, or m68k)",
       constraint: "load_selection_rejected",
     });
   if (typeof input.entryPoint !== "string")
