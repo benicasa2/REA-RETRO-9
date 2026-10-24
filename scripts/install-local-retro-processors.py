@@ -16,7 +16,7 @@ for name in ['SoftwareModeling', 'Generic', 'Utility']:
     classpath.extend((ghidra / 'Ghidra/Framework' / name / 'lib').glob('*.jar'))
 assert classpath, 'Ghidra framework libraries are missing'
 import os
-for module in ['REA65816', 'REA6800', 'REA8080']:
+for module in ['REA65816', 'REA6800', 'REA8080', 'REA6510']:
     destination = ghidra / 'Ghidra/Processors' / module
     for file in (source / module).rglob('*'):
         if not file.is_file():

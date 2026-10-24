@@ -86,6 +86,8 @@ const SUPPORTED_ARCHITECTURES = new Set([
   "arm64",
   "mips",
   "6502",
+  "6510",
+  "8500",
   "65c02",
   "65816",
   "8080",
@@ -280,7 +282,7 @@ export class GhidraProvider implements AnalysisProviderCandidate {
         status: "unsupported",
         code: "architecture_unsupported",
         reason:
-          "Ghidra v1 requires a supported x86, x86_64, arm, arm64, MIPS, RISC-V, raw 6502, raw 65c02, raw 65816, raw 8080, raw 6800, raw 6809, raw z80, or raw m68k target profile.",
+          "Ghidra v1 requires a supported x86, x86_64, arm, arm64, MIPS, RISC-V, raw 6502, raw 6510, raw 8500, raw 65c02, raw 65816, raw 8080, raw 6800, raw 6809, raw z80, or raw m68k target profile.",
         diagnostics,
       };
     return {
@@ -625,7 +627,9 @@ const inspectWindowsP0TargetSupport = (
   // The retro raw lanes retain immutable snapshots and native ownership controls.
   if (
     target.format === "raw-binary" &&
-    (target.architecture === "65c02" ||
+    (target.architecture === "6510" ||
+      target.architecture === "8500" ||
+      target.architecture === "65c02" ||
       target.architecture === "65816" ||
       target.architecture === "8080" ||
       target.architecture === "6800" ||
@@ -639,7 +643,7 @@ const inspectWindowsP0TargetSupport = (
       status: "unsupported",
       code: "target_format_unsupported",
       reason:
-        "Windows Ghidra P0 accepts native PE and explicitly selected raw 6502, 65c02, 65816, 8080, 6800, 6809 or z80 targets only.",
+        "Windows Ghidra P0 accepts native PE and explicitly selected raw 6502, 6510, 8500, 65c02, 65816, 8080, 6800, 6809 or z80 targets only.",
       diagnostics,
     };
   if (!WINDOWS_P0_NATIVE_PE_ARCHITECTURES.includes(target.architecture))

@@ -4,6 +4,8 @@ The REA Retro extension uses Ghidra's built-in 65C02 language and these separate
 installed data-only processor modules. No Java plugin, network downloader or loader
 is installed by these modules.
 
+- REA6510: Apache-2.0, derived from Ghidra 12.1.4 6502 sources. Separate
+  6510 and 8500 languages with volatile on-chip DDR/data symbols at $0000/$0001.
 - REA65816: MIT, kaayzouee/ghidra-65816 commit dbe194026a4b810e9224cc9a4092de2798c67866.
   Local fix removes the invalid cspec prototype type attribute for Ghidra 12.1.4.
   Historical language ID 65816:LE:16:default; actual default bus space is 24-bit.

@@ -11,6 +11,21 @@ const root = resolve(import.meta.dirname, "..");
 await mkdir(output, { recursive: true });
 const fixtures = [
   {
+    cpu: "6510",
+    entry: "0x1001",
+    hex: "a92f8500a9378501a50160",
+    language: "6510:LE:16:default",
+    checks: [/STA/, /LDA/, /RTS/],
+  },
+  {
+    cpu: "8500",
+    entry: "0x1001",
+    hex: "a92f8500a9378501a50160",
+    language: "8500:LE:16:default",
+    checks: [/STA/, /LDA/, /RTS/],
+  },
+
+  {
     cpu: "65c02",
     entry: "0x8001",
     hex: "a92a9c0020dafa8002a90060",
@@ -94,6 +109,24 @@ try {
     const asm = fn.normalized_result.assembly.join("\n");
     for (const pattern of f.checks)
       assert.match(asm, pattern, f.cpu + " instructions");
+    if (f.cpu === "6510" || f.cpu === "8500") {
+      const pseudo = fn.normalized_result.pseudocode;
+      assert.match(
+        pseudo,
+        /CPU_PORT_DDR/,
+        "Port DDR symbol must survive decompilation",
+      );
+      assert.match(
+        pseudo,
+        /CPU_PORT_DATA/,
+        "Port data symbol must survive decompilation",
+      );
+      assert.doesNotMatch(
+        pseudo,
+        /return\s+(?:0x37|55)\s*;/,
+        "A volatile port read must not fold to the last stored constant",
+      );
+    }
     if (f.cpu === "65816") {
       assert.match(asm, /128006: LDX/i); // Three-byte LDA then three-byte LDX in native 16-bit mode.
       assert.match(asm, /12800d: LDX/i); // Two-byte LDA then two-byte LDX after SEP.

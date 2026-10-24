@@ -1,11 +1,13 @@
-# REA Retro 7 — análise de sete CPUs clássicas
+# REA-RETRO-9 — análise de nove CPUs clássicas
 
 Versão derivada de [morluto/rea](https://github.com/morluto/rea), baseada no REA 6.7.0,
-com suporte explícito a **6502, 65C02, 65816, Intel 8080, Motorola 6800, Motorola 6809 e Z80**.
+com suporte explícito a **6502, 6510, 8500, 65C02, 65816, Intel 8080, Motorola 6800, Motorola 6809 e Z80**.
 
 | Arquitetura | Opção CLI/MCP | Espaço de endereços |
 | --- | --- | --- |
 | MOS 6502 | `6502` | 16 bits |
+| MOS 6510 | `6510` | 16 bits |
+| MOS 8500 | `8500` | 16 bits |
 | CMOS 65C02 | `65c02` | 16 bits |
 | WDC 65816 | `65816` | 24 bits |
 | Intel 8080 | `8080` | 16 bits |
@@ -14,6 +16,9 @@ com suporte explícito a **6502, 65C02, 65816, Intel 8080, Motorola 6800, Motoro
 | Zilog Z80 | `z80` | 16 bits |
 
 Veja [configuração, módulos e testes da versão atual](docs/retro-additional-cpus.md).
+Veja também [MOS 6510 e MOS 8500](docs/mos6510-8500.md), com registradores de I/O
+voláteis e os limites da análise estática. A troca de bancos do C64 não é emulada.
+
 Os módulos adicionais, seus fontes e licenças estão em
 [third_party/retro-processors](third_party/retro-processors).
 

@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<language_definitions>
+  <language processor="6510" endian="little" size="16" variant="default" version="1.0" slafile="6502.sla" processorspec="6510.pspec" id="6510:LE:16:default">
+    <description>MOS 6510 (6502 documented ISA, volatile on-chip port at $0000/$0001)</description>
+    <compiler name="default" spec="6502.cspec" id="default" />
+  </language>
+  <language processor="8500" endian="little" size="16" variant="default" version="1.0" slafile="6502.sla" processorspec="8500.pspec" id="8500:LE:16:default">
+    <description>MOS 8500 (6502 documented ISA, volatile on-chip port at $0000/$0001)</description>
+    <compiler name="default" spec="6502.cspec" id="default" />
+  </language>
+</language_definitions>

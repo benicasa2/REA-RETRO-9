@@ -161,6 +161,12 @@ export const resolveGhidraAnalysisProfile = async (
           language_id: language.languageId,
           compiler_spec_id: language.compilerSpecId,
           language_selection: "caller-supplied-v1",
+          ...(target.architecture === "6510" || target.architecture === "8500"
+            ? {
+                on_chip_io: "6510-ddr-data-volatile-byte-symbols-v1",
+                processor_model: "rea-mos6510-from-ghidra-12.1.4-6502-v1",
+              }
+            : {}),
           ...(target.architecture === "65816"
             ? {
                 raw_entry_context: "65816-native-m16-x16-e0-pbr-from-entry-v1",

@@ -196,6 +196,8 @@ cliTest(
 );
 
 cliTest.for([
+  ["6510", "0xffff"],
+  ["8500", "0xffff"],
   ["65c02", "0xffff"],
   ["8080", "0xffff"],
   ["6800", "0xffff"],

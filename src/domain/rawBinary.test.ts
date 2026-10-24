@@ -334,7 +334,7 @@ describe("z80 raw-binary admission", () => {
 });
 
 describe("additional retro CPU address widths", () => {
-  it.each(["65c02", "8080", "6800"])(
+  it.each(["65c02", "8080", "6800", "6510", "8500"])(
     "admits byte-aligned %s images only inside 16 bits",
     (architecture) => {
       for (const [entryPoint, fileBytes] of [

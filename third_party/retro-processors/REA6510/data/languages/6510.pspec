@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<processor_spec>
+  <programcounter register="PC" />
+  <default_symbols>
+    <symbol name="NMI" address="FFFA" entry="true" type="code_ptr" />
+    <symbol name="RES" address="FFFC" entry="true" type="code_ptr" />
+    <symbol name="IRQ" address="FFFE" entry="true" type="code_ptr" />
+    <symbol name="CPU_PORT_DDR" address="RAM:0000" volatile="true" size="1" description="On-chip processor port data-direction register" />
+    <symbol name="CPU_PORT_DATA" address="RAM:0001" volatile="true" size="1" description="On-chip processor I/O port; external pin values and pull-ups are not simulated" />
+  </default_symbols>
+  <default_memory_blocks>
+    <memory_block name="ZERO_PAGE" start_address="0x0000" length="0x0100" initialized="false" />
+    <memory_block name="STACK" start_address="0x0100" length="0x0100" initialized="false" />
+  </default_memory_blocks>
+</processor_spec>

@@ -19,6 +19,16 @@ export const ghidraRawBinaryLanguage = (
   architecture: RawBinaryAdmission["architecture"],
 ): GhidraRawBinaryLanguage => {
   switch (architecture) {
+    case "6510":
+    case "8500":
+      return {
+        languageId: `${architecture}:LE:16:default`,
+        compilerSpecId: "default",
+        defaultAddressSpace: "RAM",
+        limitations: [
+          "MOS 6510/8500 use the documented 6502 instruction model with separate language identities and volatile on-chip port symbols at $0000 (direction) and $0001 (data). Port-pin masking/pull-ups, C64 ROM/RAM bank switching, cassette behavior, timing and undocumented opcodes are not emulated or validated.",
+        ],
+      };
     case "65c02":
       return {
         languageId: "65C02:LE:16:default",

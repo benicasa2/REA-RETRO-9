@@ -499,6 +499,8 @@ describe("Ghidra raw-binary profile", () => {
   });
 
   it.each([
+    ["6510", "6510:LE:16:default", "0x8001"],
+    ["8500", "8500:LE:16:default", "0x8001"],
     ["65c02", "65C02:LE:16:default", "0x8001"],
     ["65816", "65816:LE:16:default", "0x128001"],
     ["8080", "8080:LE:16:default", "0x8001"],
@@ -526,6 +528,10 @@ describe("Ghidra raw-binary profile", () => {
         language_id: language,
         entry_point: entry,
       });
+      if (architecture === "6510" || architecture === "8500")
+        expect(resolved.value.profile?.parameters.on_chip_io).toBe(
+          "6510-ddr-data-volatile-byte-symbols-v1",
+        );
       if (architecture === "65816")
         expect(resolved.value.profile?.parameters.raw_entry_context).toBe(
           "65816-native-m16-x16-e0-pbr-from-entry-v1",

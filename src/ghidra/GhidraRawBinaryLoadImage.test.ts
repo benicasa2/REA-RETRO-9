@@ -373,6 +373,8 @@ describe("raw-binary independent load-image checks", () => {
 
 describe("additional retro language and mapping verification", () => {
   it.each([
+    ["6510", "6510:LE:16:default", "RAM", "0x8001", "0x8004"],
+    ["8500", "8500:LE:16:default", "RAM", "0x8001", "0x8004"],
     ["65c02", "65C02:LE:16:default", "RAM", "0x8001", "0x8004"],
     ["65816", "65816:LE:16:default", "bus", "0x128001", "0x128004"],
     ["8080", "8080:LE:16:default", "ram", "0x8001", "0x8004"],
