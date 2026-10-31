@@ -692,7 +692,9 @@ jobs:
           assert.equal(process.arch, process.env.EXPECTED_CI_ARCHITECTURE);
           console.log(JSON.stringify({ platform: process.platform, architecture: process.arch, node: process.version }));"
       - run: npm ci
+      # A cache miss must fall back to the normal build, not fail the lane.
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
         with:
           name: rea-build-cache
           path: .turbo/cache/
@@ -736,7 +738,9 @@ jobs:
         id: npm-cache
         uses: ./.github/actions/npm-cache
       - run: npm ci
+      # A cache miss must fall back to the normal build, not fail the lane.
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
         with:
           name: rea-build-cache
           path: .turbo/cache/
@@ -827,7 +831,9 @@ jobs:
           GOMAXPROCS: "2"
           GOMEMLIMIT: "3GiB"
         run: npm run typecheck -- --checkers 2
+      # A cache miss must fall back to the normal build, not fail the lane.
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
         with:
           name: rea-build-cache
           path: .turbo/cache/
