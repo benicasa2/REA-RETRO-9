@@ -377,7 +377,7 @@ it("binds provider build reuse to the current run while keeping standalone dispa
     path: ".turbo/cache/",
   });
   expect(download?.if).toBe("inputs.build_cache_artifact != ''");
-  expect(download?.["continue-on-error"]).not.toBe(true);
+  expect(download?.["continue-on-error"]).toBe(true);
   expect(action.runs.steps.find((step) => step.id === "plan")?.run).toContain(
     'node scripts/ci/portable-build-cache.mjs key >> "$GITHUB_OUTPUT"',
   );
@@ -385,6 +385,34 @@ it("binds provider build reuse to the current run while keeping standalone dispa
     (step) => step.id === "plan" || step.uses?.startsWith("actions/cache"),
   ))
     expect(step.if).toContain("inputs.build_cache_artifact == ''");
+});
+
+it("treats only optional build-cache downloads as recoverable in platform lanes", async () => {
+  const { jobs } = await workflow();
+  const steps = z.array(
+    z.object({
+      uses: z.string().optional(),
+      "continue-on-error": z.boolean().optional(),
+      with: z.object({ name: z.string().optional() }).passthrough().optional(),
+    }),
+  );
+  let cacheDownloads = 0;
+  for (const job of Object.values(jobs)) {
+    if (job.steps === undefined) continue;
+    for (const step of steps.parse(job.steps)) {
+      if (!step.uses?.startsWith("actions/download-artifact@")) continue;
+      if (step.with?.name === "rea-build-cache") {
+        cacheDownloads += 1;
+        expect(step["continue-on-error"]).toBe(true);
+      } else if (
+        step.with?.name === "windows-native-controls" ||
+        step.with?.name === "rea-test-runtime"
+      ) {
+        expect(step["continue-on-error"]).not.toBe(true);
+      }
+    }
+  }
+  expect(cacheDownloads).toBe(3);
 });
 
 it("runs workflow validation inside required static checks when selected", async () => {

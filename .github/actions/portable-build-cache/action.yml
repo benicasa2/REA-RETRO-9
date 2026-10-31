@@ -12,6 +12,8 @@ runs:
   steps:
     - name: Download portable build outputs from this workflow run
       if: inputs.build_cache_artifact != ''
+      # Callers run their normal build when these optional outputs are unavailable.
+      continue-on-error: true
       uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
       with:
         name: ${{ inputs.build_cache_artifact }}
